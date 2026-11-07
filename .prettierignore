@@ -1,0 +1,11 @@
+node_modules
+dist
+dist-ssr
+build
+.venv
+backend/.venv
+__pycache__
+*.pyc
+coverage
+.git
+.pytest_cache

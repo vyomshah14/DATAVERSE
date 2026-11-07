@@ -1,0 +1,27 @@
+{
+  "name": "dataverse-root",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DATAVERSE — 3D Living Data Center Simulator Monorepo",
+  "type": "module",
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "npm --workspace=frontend run dev",
+    "build": "npm --workspace=frontend run build",
+    "preview": "npm --workspace=frontend run preview",
+    "typecheck": "npm --workspace=frontend run typecheck",
+    "lint": "npm --workspace=frontend run lint",
+    "lint:fix": "npm --workspace=frontend run lint:fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm --workspace=frontend run test",
+    "test:watch": "npm --workspace=frontend run test:watch",
+    "test:coverage": "npm --workspace=frontend run test:coverage",
+    "backend:test": "PYTHONPATH=. backend/.venv/bin/pytest backend/app/tests"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3"
+  }
+}
