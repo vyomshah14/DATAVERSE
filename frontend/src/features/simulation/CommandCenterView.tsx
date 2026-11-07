@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { DataCenterViewport } from '../../three/scene/DataCenterViewport';
 import { useSimulationStore } from '../../store/useSimulationStore';
+import { createStarterTopology } from '../../engine/topology';
+import { TopologyNodeList, TopologyInspector } from '../topology';
 import {
   Server,
   Activity,
@@ -16,7 +18,19 @@ import {
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 export const CommandCenterView: React.FC = () => {
-  const { currentTick, status, telemetry, setStatus, resetSimulation } = useSimulationStore();
+  const {
+    currentTick,
+    status,
+    telemetry,
+    selectedNodeId,
+    selectedLinkId,
+    setSelectedNodeId,
+    setSelectedLinkId,
+    setStatus,
+    resetSimulation,
+  } = useSimulationStore();
+
+  const topology = useMemo(() => createStarterTopology(), []);
 
   // Synthetic baseline telemetry series for visualization
   const telemetryData = [
@@ -139,12 +153,32 @@ export const CommandCenterView: React.FC = () => {
       </div>
 
       {/* Main 3D Viewport Section */}
-      <div className="w-full h-[520px]">
+      <div className="w-full min-h-[540px] h-[640px] xl:h-[680px]">
         <DataCenterViewport />
       </div>
 
-      {/* Bottom Grid: Link Telemetry Chart, Quick Fault Console & Topology Hierarchy */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      {/* 2D Functional Topology Hierarchy & Read-Only Inspector */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <div className="lg:col-span-7">
+          <TopologyNodeList
+            nodes={topology.nodes}
+            selectedNodeId={selectedNodeId}
+            onSelectNode={setSelectedNodeId}
+          />
+        </div>
+        <div className="lg:col-span-5">
+          <TopologyInspector
+            topology={topology}
+            selectedNodeId={selectedNodeId}
+            selectedLinkId={selectedLinkId}
+            onSelectNode={setSelectedNodeId}
+            onSelectLink={setSelectedLinkId}
+          />
+        </div>
+      </div>
+
+      {/* Operations & Telemetry: Link Telemetry Chart & Quick Fault Console */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Real-time Link Telemetry Graph */}
         <div className="p-4 rounded-xl bg-slate-900/40 border border-slate-800/80">
           <div className="flex items-center justify-between mb-3">
@@ -252,42 +286,6 @@ export const CommandCenterView: React.FC = () => {
 
           <div className="text-[10px] font-mono text-slate-400 pt-2 border-t border-slate-800/60 mt-3">
             Deterministic state mutation engine activates on Day 13.
-          </div>
-        </div>
-
-        {/* Topology Hierarchy Invariants */}
-        <div className="p-4 rounded-xl bg-slate-900/40 border border-slate-800/80 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xs font-bold font-mono text-slate-200 uppercase tracking-wider flex items-center gap-2">
-                <Network className="w-3.5 h-3.5 text-cyan-400" />
-                Network Topology Hierarchy
-              </h2>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800/50">
-                PRD Invariant
-              </span>
-            </div>
-
-            <div className="space-y-2 mt-3 font-mono text-xs">
-              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-950/60 border border-slate-800">
-                <span className="text-cyan-300 font-semibold">Router</span>
-                <span className="text-slate-400 text-[11px]">50 Mbps link default</span>
-              </div>
-              <div className="text-center text-slate-400 text-[10px]">↓ 1ms latency</div>
-              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-950/60 border border-slate-800">
-                <span className="text-violet-300 font-semibold">Core Switch</span>
-                <span className="text-slate-400 text-[11px]">25 Mbps link default</span>
-              </div>
-              <div className="text-center text-slate-400 text-[10px]">↓ 1ms latency</div>
-              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-950/60 border border-slate-800">
-                <span className="text-blue-300 font-semibold">2x Access Switches</span>
-                <span className="text-slate-400 text-[11px]">10 Mbps link default</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="text-[10px] text-slate-400 pt-2 border-t border-slate-800/60 mt-3">
-            Note: Racks are spatial grouping objects and do not forward traffic.
           </div>
         </div>
       </div>

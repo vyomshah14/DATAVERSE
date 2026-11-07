@@ -3,6 +3,8 @@
  * Strict conformance to PRD v2.0 and DECISIONS.md.
  */
 
+export * from '../topology';
+
 export type NodeType = 'router' | 'core_switch' | 'access_switch' | 'server';
 
 export type NodeStatus = 'online' | 'degraded' | 'offline' | 'rebooting';

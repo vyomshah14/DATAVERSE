@@ -31,7 +31,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
   return (
     <aside
       className={`bg-[#060a14] border-r border-slate-800/80 transition-all duration-300 flex flex-col justify-between z-20 ${
-        collapsed ? 'w-16' : 'w-64'
+        collapsed ? 'w-16 max-md:hidden' : 'w-64'
       }`}
     >
       {/* Navigation Links */}

@@ -30,20 +30,26 @@
 - [x] Python FastAPI backend scaffolding and health endpoint testing.
 - [x] Foundational documentation: `ROADMAP.md`, `DECISIONS.md`, `CHANGELOG.md`, `KNOWN_ISSUES.md`.
 
-### Day 2: Authentication & Identity Management
+### Day 2: Authentication & Identity Management (COMPLETED)
 
-- [ ] Supabase Auth client integration (JWT session management, local storage tokens).
-- [ ] User authentication UI: Sign-in, Sign-up, Password Reset modals within console styling.
-- [ ] Protected route guards in React Router.
-- [ ] Backend FastAPI JWT validation middleware using Supabase JWKS.
-- [ ] User profile schema and session state store in Zustand.
+- [x] Supabase Auth client integration (JWT session management, local storage tokens).
+- [x] User authentication UI: Operator Sign-In and Create Account console styling.
+- [x] Protected route guards in React Router (`ProtectedRoute.tsx` with intended destination preservation).
+- [x] Backend FastAPI JWT validation middleware using Supabase JWKS (`JWKSClient`, `ES256`/`RS256`).
+- [x] User profile schema and session state store in Zustand (`useAuthStore`).
+- [x] Initial database schema migration for `workspaces` and `data_centers` applied live to Supabase.
 
 ### Day 3: Workspace & Tenancy Management
 
-- [ ] Workspace data model and CRUD APIs.
-- [ ] Multi-tenant workspace switcher in top navigation.
-- [ ] PostgreSQL migration scripts for `workspaces`, `datacenter_configurations`, and `user_roles`.
-- [ ] Mock session fallback for offline development mode.
+- [x] PostgreSQL connection pool manager and transaction-scoped RLS claims injection (`asyncpg`).
+- [x] Workspace repository and complete CRUD REST APIs (`POST /api/v1/workspaces`, `GET /api/v1/workspaces`, `GET /api/v1/workspaces/{id}`, `PATCH /api/v1/workspaces/{id}`, `DELETE /api/v1/workspaces/{id}`).
+- [x] Data Center repository and complete CRUD REST APIs (`POST /api/v1/workspaces/{id}/datacenters`, `GET /api/v1/workspaces/{id}/datacenters`, `GET /api/v1/workspaces/{id}/datacenters/{id}`, `PATCH /api/v1/workspaces/{id}/datacenters/{id}`, `DELETE /api/v1/workspaces/{id}/datacenters/{id}`).
+- [x] Foundational Topology Data Model & Deterministic Validation Engine (PRD v2.0 Invariants, Starter Topology Generator, Comprehensive Unit Testing).
+- [x] 3D Data Center Topology Visualization (Functional 3D Digital Twin, 20 Nodes, 15 Curved Cables, Interactive Node Inspector, Desktop & Mobile Responsiveness).
+- [x] 3D Scene Visibility & Scale Redesign (Hardware Dominance occupying 65-80% viewport, Equipment Pod Framing, Open 42U Server Racks, High-Detail Metallic Server Blades, Overhead Cable Trays, Multi-Source Studio Lighting Rig with Direct Aisle Key Light, Isometric Framing).
+- [x] Functional 2D Node List & Topology Inspector (2D Node Tree of 20 Nodes, Nested Server-Rack Hierarchy, Read-Only Inspector with Zero WebGL Dependency, Two-Way Selection Sync with 3D Viewport, Comprehensive Test Suite).
+- [x] Pure Topology Editing Operations Foundation (Immutable, Deterministic Graph Operations, Cascade Deletion Safety, Link & Config Mutations, 37 Vitest Unit Tests).
+- [ ] Multi-tenant workspace switcher in top navigation and frontend Zustand sync.
 
 ---
 
@@ -51,25 +57,27 @@
 
 ### Day 4: Three.js / React Three Fiber Scene Setup
 
-- [ ] High-performance WebGL Canvas with anti-aliasing and tone mapping.
-- [ ] OrbitControls with restricted pitch, zoom boundaries, and smooth damping.
-- [ ] Atmospheric lighting: soft ambient, directional key lights, and cyan/violet server accent lights.
-- [ ] Procedural floor grid with subtle reflective tile shaders.
-- [ ] Viewport responsiveness and canvas resize observers.
+- [x] High-performance WebGL Canvas with anti-aliasing and tone mapping.
+- [x] OrbitControls with restricted pitch, zoom boundaries, and smooth damping.
+- [x] Atmospheric lighting: soft ambient, directional key lights, and cyan/violet server accent lights.
+- [x] Procedural floor grid with subtle reflective tile shaders.
+- [x] Viewport responsiveness and canvas resize observers.
 
 ### Day 5: 3D Hardware Objects & Physical Hierarchy
 
-- [ ] Standard 42U Data Center Server Rack mesh with perforated panels and glowing status LEDs.
-- [ ] Modular network hardware meshes: Edge Router, Core Switch, Access Switches.
-- [ ] Modular rack-mounted server blades (1U/2U form factors) with activity indicators.
-- [ ] Physical coordinate layout engine: automatic row, aisle, and rack slot positioning.
+- [x] Standard 42U Data Center Server Rack mesh with perforated panels, 42U EIA mounting rail ticks, leveling feet, and status LEDs.
+- [x] Modular network hardware meshes: Edge Router, Core Switch, Access Switches with realistic port sockets.
+- [x] Modular rack-mounted server blades (2U form factors) with quad hot-swap drive caddies, SFP+ cages, and activity indicators.
+- [x] Physical coordinate layout engine: automatic row, aisle, and rack slot positioning.
+- [x] Enterprise Data Center Environment: Raised floor equipment runways, safety borders, and overhead transverse cable ladder raceways.
 
 ### Day 6: Visual Telemetry & Shaders
 
-- [ ] Interactive object raycasting and selection hover highlights.
-- [ ] Cable management rendering: Cat6/Fiber curves connecting switches and servers.
-- [ ] Dynamic LED status shaders indicating CPU load, link saturation, and hardware faults.
-- [ ] Camera framing presets (Birds-eye overview, aisle view, rack focus).
+- [x] Interactive object raycasting and selection hover highlights.
+- [x] Cable management rendering: Cubic Bezier overhead raceway curves connecting switches and servers with strain relief boots.
+- [x] Dynamic LED status indicators (Emerald power, electric cyan NIC, amber disk activity).
+- [x] Collapsible Glassmorphic Node Inspector HUD with minimize/expand controls preventing scene obscuration.
+- [x] Camera framing presets (Front, Rear, Left, Right, Top, Isometric, Cinematic overview) with smooth interpolation controller.
 
 ---
 

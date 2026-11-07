@@ -16,6 +16,7 @@ interface SimulationState {
   currentTick: number;
   status: SimulationStatus;
   selectedNodeId: string | null;
+  selectedLinkId: string | null;
   seed: string;
   telemetry: TelemetrySummary;
   activeWorkspace: string;
@@ -23,6 +24,7 @@ interface SimulationState {
   setTick: (tick: number) => void;
   setStatus: (status: SimulationStatus) => void;
   setSelectedNodeId: (id: string | null) => void;
+  setSelectedLinkId: (id: string | null) => void;
   setActiveWorkspace: (workspace: string) => void;
   resetSimulation: () => void;
 }
@@ -31,6 +33,7 @@ export const useSimulationStore = create<SimulationState>((set) => ({
   currentTick: 0,
   status: 'idle',
   selectedNodeId: null,
+  selectedLinkId: null,
   seed: '0x4f3a9b1c7e8d2f10',
   activeWorkspace: 'US-East Production (DC-01)',
   telemetry: {
@@ -44,12 +47,27 @@ export const useSimulationStore = create<SimulationState>((set) => ({
   },
   setTick: (tick) => set({ currentTick: tick }),
   setStatus: (status) => set({ status }),
-  setSelectedNodeId: (id) => set({ selectedNodeId: id }),
+  setSelectedNodeId: (id) =>
+    set({
+      selectedNodeId: id,
+      selectedLinkId: id ? null : undefined,
+    }),
+  setSelectedLinkId: (id) =>
+    set({
+      selectedLinkId: id,
+      selectedNodeId: id ? null : undefined,
+    }),
   setActiveWorkspace: (workspace) => set({ activeWorkspace: workspace }),
   resetSimulation: () =>
     set({
       currentTick: 0,
       status: 'idle',
       selectedNodeId: null,
+      selectedLinkId: null,
     }),
 }));
+
+if (typeof window !== 'undefined') {
+  (window as unknown as { useSimulationStore: typeof useSimulationStore }).useSimulationStore =
+    useSimulationStore;
+}

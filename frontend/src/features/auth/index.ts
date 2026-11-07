@@ -1,8 +1,7 @@
 /**
- * Authentication Feature Module (Day 2).
+ * Authentication Module Exports
  */
-export interface UserSession {
-  userId: string;
-  email: string;
-  role: 'admin' | 'operator' | 'viewer';
-}
+export { useAuthStore } from './useAuthStore';
+export { ProtectedRoute } from './ProtectedRoute';
+export { LoginPage } from './LoginPage';
+export * from './types';

@@ -1,9 +1,24 @@
 import React from 'react';
 import { useSimulationStore } from '../../store/useSimulationStore';
-import { Server, Activity, ShieldCheck, ChevronDown, Bell, Cpu, Layers } from 'lucide-react';
+import { useAuthStore } from '../../features/auth/useAuthStore';
+import {
+  Server,
+  Activity,
+  ShieldCheck,
+  ChevronDown,
+  Bell,
+  Cpu,
+  Layers,
+  LogOut,
+} from 'lucide-react';
 
 export const TopNavbar: React.FC = () => {
   const { currentTick, status, seed, activeWorkspace, telemetry } = useSimulationStore();
+  const { user, logout } = useAuthStore();
+
+  const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : 'O';
+  const displayName =
+    (user?.user_metadata?.display_name as string) || user?.email?.split('@')[0] || 'Operator';
 
   return (
     <header className="h-16 bg-[#070c18] border-b border-slate-800/80 px-4 lg:px-6 flex items-center justify-between z-30 sticky top-0">
@@ -85,18 +100,27 @@ export const TopNavbar: React.FC = () => {
           <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-[#070c18]" />
         </button>
 
-        {/* User Profile */}
-        <div className="flex items-center gap-2.5 pl-2 border-l border-slate-800">
-          <div className="w-8 h-8 rounded-full bg-slate-800 border border-cyan-500/30 flex items-center justify-center font-mono text-xs font-bold text-cyan-300">
-            VS
-          </div>
-          <div className="hidden sm:block text-left text-xs">
-            <div className="text-slate-200 font-medium">vyomshah</div>
-            <div className="text-[10px] text-slate-400 font-mono flex items-center gap-1">
-              <Cpu className="w-2.5 h-2.5 text-cyan-400" />
-              ARCHITECT
+        {/* User Profile & Sign Out */}
+        <div className="flex items-center gap-3 pl-3 border-l border-slate-800">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-slate-800 border border-cyan-500/30 flex items-center justify-center font-mono text-xs font-bold text-cyan-300">
+              {userInitial}
+            </div>
+            <div className="hidden sm:block text-left text-xs">
+              <div className="text-slate-200 font-medium truncate max-w-[120px]">{displayName}</div>
+              <div className="text-[10px] text-slate-400 font-mono flex items-center gap-1">
+                <Cpu className="w-2.5 h-2.5 text-cyan-400" />
+                <span>OPERATOR</span>
+              </div>
             </div>
           </div>
+          <button
+            onClick={() => logout()}
+            title="Sign Out Session"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-900 border border-transparent hover:border-rose-900/40 transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </header>

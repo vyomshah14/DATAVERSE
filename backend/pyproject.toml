@@ -12,6 +12,7 @@ dependencies = [
     "pydantic-settings>=2.7.0",
     "uvicorn[standard]>=0.34.0",
     "PyJWT[crypto]>=2.9.0",
+    "asyncpg>=0.30.0",
 ]
 
 [project.optional-dependencies]

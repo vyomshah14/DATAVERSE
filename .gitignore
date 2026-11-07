@@ -61,3 +61,6 @@ htmlcov/
 *.sqlite3
 *.db
 
+# Temporary scratch scripts
+scratch/
+

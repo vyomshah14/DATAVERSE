@@ -4,7 +4,9 @@ import { TopNavbar } from './TopNavbar';
 import { Sidebar } from './Sidebar';
 
 export const MainLayout: React.FC = () => {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
 
   return (
     <div className="min-h-screen flex flex-col bg-[#070b14] text-slate-100">

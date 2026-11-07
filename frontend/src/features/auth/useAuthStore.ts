@@ -1,250 +1,168 @@
 import { create } from 'zustand';
-import type { AuthState, UserProfile, UserRole } from './types';
-import { supabase, isSupabaseConfigured } from '../../services/supabaseClient';
+import type { User, Session } from '@supabase/supabase-js';
+import { AuthService } from '../../services/authService';
 
-const DEMO_USER: UserProfile = {
-  id: 'usr_demo_4f3a9b1c',
-  email: 'vyomshah2021@gmail.com',
-  displayName: 'vyomshah',
-  role: 'admin',
-  createdAt: '2026-11-07T08:00:00Z',
-};
+export interface AuthState {
+  user: User | null;
+  session: Session | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  isInitializing: boolean;
+  error: string | null;
+  successMessage: string | null;
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: DEMO_USER, // Default to demo session for instant local readiness
-  token: 'demo-bearer-token-signed-local',
-  isAuthenticated: true,
+  // Actions
+  initialize: () => Promise<void>;
+  cleanup: () => void;
+  login: (email: string, password: string) => Promise<boolean>;
+  signUp: (email: string, password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
+  clearError: () => void;
+  clearSuccessMessage: () => void;
+}
+
+// Module-level reference to prevent duplicate listener registrations
+let unsubscribeAuthListener: (() => void) | null = null;
+
+export const useAuthStore = create<AuthState>((set, get) => ({
+  user: null,
+  session: null,
+  isAuthenticated: false,
   isLoading: false,
+  isInitializing: true,
   error: null,
-  authMode: 'demo',
-  isAuthModalOpen: false,
+  successMessage: null,
 
-  openAuthModal: () => set({ isAuthModalOpen: true, error: null }),
-  closeAuthModal: () => set({ isAuthModalOpen: false, error: null }),
   clearError: () => set({ error: null }),
+  clearSuccessMessage: () => set({ successMessage: null }),
 
-  login: async (email: string, password: string) => {
-    set({ isLoading: true, error: null });
-
-    if (!isSupabaseConfigured || !supabase) {
-      // Offline/Dev fallback mode
-      if (password.length < 6) {
-        set({
-          isLoading: false,
-          error: 'Password must be at least 6 characters in development mode.',
-        });
-        return false;
-      }
-
-      const role: UserRole = email.includes('admin')
-        ? 'admin'
-        : email.includes('operator')
-          ? 'operator'
-          : 'viewer';
-
-      const userProfile: UserProfile = {
-        id: `usr_${Math.random().toString(36).substring(2, 10)}`,
-        email,
-        displayName: email.split('@')[0] || 'Operator',
-        role,
-        createdAt: new Date().toISOString(),
-      };
-
-      set({
-        user: userProfile,
-        token: `dev-token-${userProfile.id}`,
-        isAuthenticated: true,
-        isLoading: false,
-        authMode: 'demo',
-        isAuthModalOpen: false,
-        error: null,
-      });
-      return true;
-    }
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        set({ isLoading: false, error: error.message });
-        return false;
-      }
-
-      if (data.user && data.session) {
-        const metadataRole = (data.user.user_metadata?.role as UserRole) || 'operator';
-        const userProfile: UserProfile = {
-          id: data.user.id,
-          email: data.user.email || email,
-          displayName:
-            data.user.user_metadata?.full_name ||
-            (data.user.email ? data.user.email.split('@')[0] : 'Operator'),
-          role: metadataRole,
-          createdAt: data.user.created_at,
-        };
-
-        set({
-          user: userProfile,
-          token: data.session.access_token,
-          isAuthenticated: true,
-          isLoading: false,
-          authMode: 'supabase',
-          isAuthModalOpen: false,
-          error: null,
-        });
-        return true;
-      }
-
-      set({ isLoading: false, error: 'Authentication failed: No session returned.' });
-      return false;
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Unknown authentication error';
-      set({ isLoading: false, error: message });
-      return false;
-    }
-  },
-
-  signUp: async (email: string, password: string, role: UserRole = 'operator') => {
-    set({ isLoading: true, error: null });
-
-    if (!isSupabaseConfigured || !supabase) {
-      if (password.length < 6) {
-        set({
-          isLoading: false,
-          error: 'Password must be at least 6 characters.',
-        });
-        return false;
-      }
-
-      const userProfile: UserProfile = {
-        id: `usr_${Math.random().toString(36).substring(2, 10)}`,
-        email,
-        displayName: email.split('@')[0] || 'Operator',
-        role,
-        createdAt: new Date().toISOString(),
-      };
-
-      set({
-        user: userProfile,
-        token: `dev-token-${userProfile.id}`,
-        isAuthenticated: true,
-        isLoading: false,
-        authMode: 'demo',
-        isAuthModalOpen: false,
-        error: null,
-      });
-      return true;
-    }
-
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            role,
-            full_name: email.split('@')[0],
-          },
-        },
-      });
-
-      if (error) {
-        set({ isLoading: false, error: error.message });
-        return false;
-      }
-
-      if (data.user) {
-        const userProfile: UserProfile = {
-          id: data.user.id,
-          email: data.user.email || email,
-          displayName: email.split('@')[0] || 'Operator',
-          role,
-          createdAt: data.user.created_at,
-        };
-
-        set({
-          user: userProfile,
-          token: data.session?.access_token || null,
-          isAuthenticated: Boolean(data.session),
-          isLoading: false,
-          authMode: 'supabase',
-          isAuthModalOpen: false,
-          error: null,
-        });
-        return true;
-      }
-
-      set({ isLoading: false, error: 'Sign up failed.' });
-      return false;
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Unknown registration error';
-      set({ isLoading: false, error: message });
-      return false;
-    }
-  },
-
-  loginAsDemo: (role: UserRole = 'admin') => {
-    set({
-      user: {
-        ...DEMO_USER,
-        role,
-      },
-      token: `demo-bearer-token-${role}`,
-      isAuthenticated: true,
-      authMode: 'demo',
-      isAuthModalOpen: false,
-      error: null,
-    });
-  },
-
-  logout: async () => {
-    set({ isLoading: true });
-    if (isSupabaseConfigured && supabase) {
-      try {
-        await supabase.auth.signOut();
-      } catch {
-        // Continue clearing state even if remote signout fails
-      }
-    }
-
-    set({
-      user: null,
-      token: null,
-      isAuthenticated: false,
-      isLoading: false,
-      error: null,
-    });
-  },
-
-  checkSession: async () => {
-    if (!isSupabaseConfigured || !supabase) {
-      // Retain current session or default demo
+  initialize: async () => {
+    // Prevent duplicate listener registrations
+    if (unsubscribeAuthListener) {
       return;
     }
 
     try {
-      const { data } = await supabase.auth.getSession();
-      if (data.session && data.session.user) {
-        const user = data.session.user;
-        const role = (user.user_metadata?.role as UserRole) || 'operator';
+      // 1. Subscribe to auth events (SIGN_IN, SIGN_OUT, TOKEN_REFRESHED)
+      unsubscribeAuthListener = AuthService.onAuthStateChange((_event, session) => {
         set({
-          user: {
-            id: user.id,
-            email: user.email || '',
-            displayName:
-              user.user_metadata?.full_name || (user.email ? user.email.split('@')[0] : 'Operator'),
-            role,
-            createdAt: user.created_at,
-          },
-          token: data.session.access_token,
-          isAuthenticated: true,
-          authMode: 'supabase',
+          session,
+          user: session?.user ?? null,
+          isAuthenticated: Boolean(session?.user),
+          isInitializing: false,
         });
+      });
+
+      // 2. Fetch existing session from Supabase storage
+      const session = await AuthService.getSession();
+      set({
+        session,
+        user: session?.user ?? null,
+        isAuthenticated: Boolean(session?.user),
+        isInitializing: false,
+      });
+    } catch (err: unknown) {
+      set({
+        user: null,
+        session: null,
+        isAuthenticated: false,
+        isInitializing: false,
+        error: AuthService.formatAuthError(err),
+      });
+    }
+  },
+
+  cleanup: () => {
+    if (unsubscribeAuthListener) {
+      unsubscribeAuthListener();
+      unsubscribeAuthListener = null;
+    }
+  },
+
+  login: async (email: string, password: string): Promise<boolean> => {
+    set({ isLoading: true, error: null, successMessage: null });
+
+    try {
+      const { user, session } = await AuthService.signIn({ email, password });
+      set({
+        user,
+        session,
+        isAuthenticated: Boolean(user),
+        isLoading: false,
+        error: null,
+      });
+      return true;
+    } catch (err: unknown) {
+      const formatted = AuthService.formatAuthError(err);
+      set({
+        isLoading: false,
+        error: formatted,
+      });
+      return false;
+    }
+  },
+
+  signUp: async (email: string, password: string): Promise<boolean> => {
+    set({ isLoading: true, error: null, successMessage: null });
+
+    try {
+      const { user, session, requiresEmailVerification } = await AuthService.signUp({
+        email,
+        password,
+      });
+
+      if (requiresEmailVerification) {
+        set({
+          user: null,
+          session: null,
+          isAuthenticated: false,
+          isLoading: false,
+          successMessage:
+            'Registration successful! Please check your email to confirm your account before signing in.',
+        });
+        return true;
       }
+
+      set({
+        user,
+        session,
+        isAuthenticated: Boolean(user && session),
+        isLoading: false,
+        error: null,
+      });
+      return true;
+    } catch (err: unknown) {
+      const formatted = AuthService.formatAuthError(err);
+      set({
+        isLoading: false,
+        error: formatted,
+      });
+      return false;
+    }
+  },
+
+  logout: async (): Promise<void> => {
+    set({ isLoading: true });
+    try {
+      await AuthService.signOut();
     } catch {
-      // In case network is down
+      // Proceed with local state clearing even if remote signOut fails
+    } finally {
+      get().cleanup();
+      set({
+        user: null,
+        session: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error: null,
+        successMessage: null,
+      });
+      // Re-initialize listener for future sessions
+      get().initialize();
     }
   },
 }));
+
+if (typeof window !== 'undefined') {
+  (window as unknown as { useAuthStore: typeof useAuthStore }).useAuthStore = useAuthStore;
+}

@@ -3,10 +3,21 @@ DATAVERSE Backend Service Entrypoint.
 FastAPI application with CORS, route mounting, and lifecycle logging.
 """
 
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.app.core.config import settings
+from backend.app.core.database import db_manager
 from backend.app.api.router import api_router
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manages application startup and graceful shutdown hooks."""
+    yield
+    # Graceful connection pool termination
+    await db_manager.close()
+
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -14,6 +25,7 @@ app = FastAPI(
     description="Backend API for DATAVERSE 3D Living Data Center Simulator.",
     docs_url="/docs",
     redoc_url="/redoc",
+    lifespan=lifespan,
 )
 
 # CORS configuration for frontend simulation console
