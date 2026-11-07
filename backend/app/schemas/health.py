@@ -15,3 +15,4 @@ class HealthResponse(BaseModel):
     service: str = Field(..., description="Service identifier")
     version: str = Field(..., description="Application version")
     environment: str = Field(..., description="Current operational environment")
+

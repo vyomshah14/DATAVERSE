@@ -28,3 +28,4 @@ async def test_health_check_endpoint():
     assert data["status"] == "healthy"
     assert "DATAVERSE" in data["service"]
     assert data["version"] == "0.1.0"
+

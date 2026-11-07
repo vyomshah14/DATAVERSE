@@ -1,8 +1,4 @@
-/**
- * Supabase Client Configuration & Initialization.
- * Reads environment variables from VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.
- * Never exposes hardcoded credentials.
- */
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 export interface SupabaseConfig {
   url: string;
@@ -10,17 +6,30 @@ export interface SupabaseConfig {
   isConfigured: boolean;
 }
 
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+
+export const isSupabaseConfigured = Boolean(
+  supabaseUrl &&
+  supabaseAnonKey &&
+  !supabaseUrl.includes('your-project-id') &&
+  !supabaseAnonKey.includes('placeholder')
+);
+
+export const supabase: SupabaseClient | null = isSupabaseConfigured
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+      },
+    })
+  : null;
+
 export function getSupabaseConfig(): SupabaseConfig {
-  const url = import.meta.env.VITE_SUPABASE_URL || '';
-  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-
-  const isConfigured = Boolean(
-    url && anonKey && !url.includes('your-project-id') && !anonKey.includes('placeholder')
-  );
-
   return {
-    url,
-    anonKey,
-    isConfigured,
+    url: supabaseUrl,
+    anonKey: supabaseAnonKey,
+    isConfigured: isSupabaseConfigured,
   };
 }

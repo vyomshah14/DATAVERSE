@@ -60,3 +60,4 @@ htmlcov/
 # Local databases / temp storage
 *.sqlite3
 *.db
+

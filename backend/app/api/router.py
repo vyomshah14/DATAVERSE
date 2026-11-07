@@ -18,3 +18,4 @@ async def health_check() -> HealthResponse:
         version=settings.VERSION,
         environment=settings.ENVIRONMENT,
     )
+
